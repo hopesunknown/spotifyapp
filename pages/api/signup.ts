@@ -23,12 +23,26 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         return
     }
 
-    const token = jwt.sign({
+    const token = jwt.sign(
+        {
         email: user.email,
         id: user.id,
         time: Date.now()
-    }, 
-    'hello',
-    { expiresIn: '8h' }
+        }, 
+         'hello',
+        { expiresIn: '8h' }
     )
+
+    res.setHeader(
+        'Set-Cookie',
+        cookie.serialize('SPOTIFY_ACCESS_TOKEN', token, {
+            httpOnly: true,
+            maxAge: 8 * 60 * 60,
+            path: '/',
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+        })
+    )
+
+    res.json(user)
 }
